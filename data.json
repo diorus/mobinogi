@@ -1,0 +1,146 @@
+{
+    "listCharacter": [
+        "묻어가는자",
+        "세천홍",
+        "은천홍",
+        "우천홍",
+        "동천홍"
+    ],
+    "daily": {
+        "market": false,
+        "listDailyHomework": {
+            "요일던전": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "아르바이트": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "심층": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "검은구멍1": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "검은구멍2": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "검은구멍3": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "결계1": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "결계2": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        "listTrade": {
+            "티르코네일": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "콜헨": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "두갈드아일": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "던바튼": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        }
+    },
+    "weekly": {
+        "listWeeklyHomework": {
+            "어비스": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "레이드": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "필드보스": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "마물증표교환": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "아르바이트": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "요리재료": [
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        }
+    }
+}
