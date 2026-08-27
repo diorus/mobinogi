@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>보석 태그 교환 계산기 · 마비노기 모바일</title>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel2:#1b2230; --line:#2a323d; --line2:#3a4553;
+  --tx:#e6edf3; --tx2:#9aa7b4; --tx3:#6b7885;
+  --acc:#4dabf7; --acc-dim:#17334f; --good:#4ade80; --warn:#fbbf24; --bad:#f87171; --gold:#e8c07a;
+  --t0:#f472b6; --t1:#f87171; --t2:#fb923c; --t3:#38bdf8;
+  --t4:#4ade80; --t5:#a78bfa; --t6:#facc15; --t7:#818cf8;
+  --g0:#4dabf7; --g1:#c084fc; --g2:#fbbf24; --g3:#34d399;
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--tx);
+  font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+  font-size:15px; line-height:1.55; letter-spacing:-.01em;
+}
+main{max-width:1000px; margin:0 auto; padding:0 16px 80px}
+
+header{border-bottom:1px solid var(--line); background:linear-gradient(180deg,#131a24,var(--bg))}
+.head-in{max-width:1000px; margin:0 auto; padding:26px 16px 22px}
+h1{margin:0; font-size:1.32rem; font-weight:700; letter-spacing:-.02em}
+h1 span{color:var(--acc)}
+.sub{margin:6px 0 0; color:var(--tx2); font-size:.86rem}
+
+section{margin-top:28px}
+h2{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:0 0 11px; font-size:1.02rem; font-weight:700}
+h2 .num{flex:none; width:21px; height:21px; border-radius:6px; background:var(--acc-dim); color:var(--acc);
+  font-size:.72rem; font-weight:700; display:grid; place-items:center}
+h2 .hint{font-size:.78rem; font-weight:400; color:var(--tx3)}
+h3{margin:24px 0 8px; font-size:.94rem; font-weight:700}
+h3 .hint{font-size:.78rem; font-weight:400; color:var(--tx3); margin-left:6px}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px}
+
+/* 태그 칩 */
+.tagrow{display:flex; flex-wrap:wrap; gap:6px}
+.tag{--c:var(--tx2); appearance:none; cursor:pointer; user-select:none;
+  border:1px solid var(--line2); background:#1a2129; color:var(--tx2);
+  border-radius:999px; padding:5px 12px; font:inherit; font-size:.85rem; font-weight:600; transition:.13s ease}
+.tag:hover{border-color:var(--c); color:var(--tx)}
+.tag.on{background:color-mix(in srgb, var(--c) 20%, transparent); border-color:var(--c); color:var(--c);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--c) 40%, transparent) inset}
+.t0{--c:var(--t0)}.t1{--c:var(--t1)}.t2{--c:var(--t2)}.t3{--c:var(--t3)}
+.t4{--c:var(--t4)}.t5{--c:var(--t5)}.t6{--c:var(--t6)}.t7{--c:var(--t7)}
+.chip{--c:var(--tx2); display:inline-block; border-radius:999px; padding:1px 9px;
+  font-size:.79rem; font-weight:600; white-space:nowrap;
+  background:color-mix(in srgb, var(--c) 17%, transparent);
+  border:1px solid color-mix(in srgb, var(--c) 45%, transparent); color:var(--c)}
+.chip.off{--c:var(--tx3); opacity:.6; font-weight:500}
+.combo{display:inline-flex; gap:4px; flex-wrap:wrap; vertical-align:middle}
+
+/* 목표 카드 */
+.goal{--c:var(--g0); background:var(--panel2); border:1px solid var(--line);
+  border-left:3px solid var(--c); border-radius:10px; padding:10px 12px; margin-bottom:8px}
+.goal.g0{--c:var(--g0)}.goal.g1{--c:var(--g1)}.goal.g2{--c:var(--g2)}.goal.g3{--c:var(--g3)}
+.glabel{--c:var(--g0); flex:none; width:22px; height:22px; border-radius:6px; font-size:.75rem; font-weight:700;
+  display:inline-grid; place-items:center; background:color-mix(in srgb, var(--c) 22%, transparent);
+  border:1px solid color-mix(in srgb, var(--c) 50%, transparent); color:var(--c); vertical-align:middle}
+.glabel.g0{--c:var(--g0)}.glabel.g1{--c:var(--g1)}.glabel.g2{--c:var(--g2)}.glabel.g3{--c:var(--g3)}
+.gname{background:transparent; border:none; border-bottom:1px dashed var(--line2); color:var(--tx);
+  font:inherit; font-size:.88rem; font-weight:600; padding:2px 2px; width:110px}
+.gname:focus{outline:none; border-bottom-color:var(--acc)}
+
+button{font:inherit}
+.btn{cursor:pointer; border-radius:9px; padding:8px 15px; font-size:.87rem; font-weight:600;
+  border:1px solid var(--line2); background:var(--panel2); color:var(--tx); transition:.13s}
+.btn:hover{border-color:var(--acc); color:var(--acc)}
+.btn.primary{background:var(--acc); border-color:var(--acc); color:#06121e}
+.btn.primary:hover{filter:brightness(1.1); color:#06121e}
+.btn.primary:disabled{background:var(--panel2); border-color:var(--line); color:var(--tx3); cursor:not-allowed; filter:none}
+.btn.sm{padding:5px 11px; font-size:.8rem}
+.btn.ghost{background:transparent; border-color:transparent; color:var(--tx3)}
+.btn.ghost:hover{color:var(--bad); border-color:transparent}
+.btn.dash{border-style:dashed; color:var(--tx2)}
+
+input[type=number],input[type=text],select,textarea{background:#10151c; color:var(--tx);
+  border:1px solid var(--line2); border-radius:8px; padding:7px 9px; font:inherit; font-size:.87rem}
+input[type=number]{width:64px; text-align:center}
+input:focus,select:focus,textarea:focus{outline:none; border-color:var(--acc)}
+textarea{width:100%; min-height:104px; resize:vertical; font-family:ui-monospace,Consolas,monospace; font-size:.82rem; line-height:1.6}
+label{font-size:.85rem; color:var(--tx2)}
+.divider{height:1px; background:var(--line); margin:13px -14px}
+.flexline{display:flex; align-items:center; gap:9px; flex-wrap:wrap}
+.spacer{flex:1 1 auto}
+
+.invlist{display:flex; flex-direction:column; gap:6px}
+.invrow{display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+  background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:7px 9px}
+.invrow .combo{flex:1 1 180px}
+.invrow .mt{font-size:.74rem; color:var(--tx3); font-variant-numeric:tabular-nums; white-space:nowrap}
+.step{display:flex; align-items:center; gap:2px}
+.step button{cursor:pointer; width:27px; height:27px; border-radius:7px; border:1px solid var(--line2);
+  background:#10151c; color:var(--tx2); font-size:1rem; line-height:1; display:grid; place-items:center}
+.step button:hover{border-color:var(--acc); color:var(--acc)}
+.step .cnt{min-width:34px; text-align:center; font-weight:700; font-variant-numeric:tabular-nums}
+.empty{color:var(--tx3); font-size:.86rem; text-align:center; padding:16px 8px}
+
+.hero{background:linear-gradient(135deg,#15263a,#161b22 62%); border:1px solid #2b4a6b; border-radius:12px; padding:16px}
+.hero .lead{font-size:.78rem; color:var(--acc); font-weight:700; letter-spacing:.03em}
+.hero .big{margin:5px 0 0; font-size:1.4rem; font-weight:700; line-height:1.35}
+.hero .big b{color:var(--good)}
+.hero .big .g{color:var(--gold)}
+.stats{display:flex; flex-wrap:wrap; gap:8px; margin-top:13px}
+.stat{flex:1 1 92px; background:#10151c88; border:1px solid var(--line); border-radius:9px; padding:8px 10px; text-align:center}
+.stat .k{font-size:.72rem; color:var(--tx3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.stat .v{font-size:1.1rem; font-weight:700; font-variant-numeric:tabular-nums}
+
+.route{margin-top:13px}
+.rlabel{font-size:.78rem; color:var(--tx3); margin-bottom:6px}
+.steps{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
+.steps li{display:flex; align-items:center; gap:8px; background:#10151c; border:1px solid var(--line2);
+  border-radius:9px; padding:7px 11px; font-size:.87rem; flex-wrap:wrap}
+.steps li .n{flex:none; width:19px; height:19px; border-radius:5px; background:var(--panel2);
+  color:var(--tx3); font-size:.7rem; font-weight:700; display:grid; place-items:center}
+.steps li .sw{color:var(--tx3); font-size:.8rem}
+.steps li .cost{margin-left:auto; color:var(--gold); font-size:.78rem; white-space:nowrap}
+.nostep{background:#10151c; border:1px solid var(--line2); border-radius:9px; padding:9px 12px;
+  font-size:.86rem; color:var(--good)}
+
+.scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; background:var(--panel);
+  border:1px solid var(--line); border-radius:11px}
+table{border-collapse:collapse; width:100%; font-size:.86rem; min-width:560px}
+th,td{border-bottom:1px solid var(--line); padding:8px 9px; text-align:center; white-space:nowrap}
+th{color:var(--tx3); font-size:.75rem; font-weight:600; background:#131922}
+tbody tr:last-child td{border-bottom:none}
+td.l,th.l{text-align:left; white-space:normal}
+tbody tr.clk{cursor:pointer}
+tbody tr.clk:hover{background:#1b2230}
+tbody tr.sel{background:var(--acc-dim); box-shadow:inset 2px 0 0 var(--acc)}
+tbody tr.now td{color:var(--tx2)}
+.num-c{font-variant-numeric:tabular-nums; font-weight:700}
+.c3{color:var(--good)}.c2{color:var(--warn)}.c1{color:var(--tx2)}.c0{color:var(--tx3)}
+.gold{color:var(--gold); font-variant-numeric:tabular-nums}
+.split{display:inline-flex; gap:5px; align-items:center; font-variant-numeric:tabular-nums}
+.split i{font-style:normal; color:var(--tx3); font-size:.78rem}
+.badge{display:inline-block; padding:0 7px; border-radius:6px; font-size:.73rem; font-weight:700;
+  background:var(--panel2); color:var(--tx2)}
+.badge.zero{background:#1f3b26; color:var(--good)}
+.badge.rec{background:#1d3a57; color:var(--acc)}
+.badge.no{background:#3b2020; color:#f0a1a1}
+.dom td{opacity:.5}
+
+.note{background:#151d17; border:1px solid #2b4433; border-left:3px solid var(--good);
+  border-radius:9px; padding:10px 13px; font-size:.83rem; color:#b9d4c2}
+.note b{color:var(--good)}
+.warnbox{background:#2a1f14; border:1px solid #5c4525; border-left:3px solid var(--warn);
+  border-radius:9px; padding:11px 13px; font-size:.86rem; color:#e7d3ae}
+.warnbox b{color:var(--warn)}
+.badbox{background:#2a1717; border:1px solid #5c2a2a; border-left:3px solid var(--bad);
+  border-radius:9px; padding:11px 13px; font-size:.86rem; color:#edc3c3}
+.badbox b{color:#ff9f9f}
+details{margin-top:11px; border:1px solid var(--line); border-radius:10px; background:var(--panel); padding:0 13px}
+details[open]{padding-bottom:13px}
+summary{cursor:pointer; padding:10px 0; font-size:.87rem; font-weight:600; color:var(--tx2); list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ "; color:var(--tx3)}
+details[open] summary::before{content:"▾ "}
+summary:hover{color:var(--acc)}
+.doc{font-size:.85rem; color:var(--tx2)}
+.doc p{margin:.6em 0}
+.doc b{color:var(--tx)}
+.doc code{background:#10151c; border:1px solid var(--line); border-radius:5px; padding:1px 5px; font-size:.9em}
+.doc a{color:var(--acc)}
+footer{border-top:1px solid var(--line); margin-top:46px; padding:18px 16px 36px; color:var(--tx3); font-size:.78rem; text-align:center}
+@media (max-width:560px){ .stat{flex:1 1 calc(50% - 8px)} .hero .big{font-size:1.16rem} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-in">
+    <h1>보석 태그 <span>교환 계산기</span></h1>
+    <p class="sub">마비노기 모바일 · 맞교환 1회 = 100만 골드. 목표를 여러 개 두고, 8! = 40,320가지 순열을 전수 탐색해 최소 골드 루트를 찾습니다.</p>
+  </div>
+</header>
+
+<main>
+
+  <section>
+    <h2><span class="num">1</span>목표 <span class="hint">최대 4개 · 각 태그 3개</span></h2>
+    <div class="panel">
+      <div id="goalList"></div>
+      <button class="btn sm dash" id="addGoal" type="button">+ 목표 추가</button>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span>보유 보석 <span class="hint" id="invHint"></span></h2>
+    <div class="panel">
+      <div class="tagrow" id="pickRow"></div>
+      <div class="flexline" style="margin-top:11px">
+        <div class="combo" id="pickPreview"></div>
+        <div class="spacer"></div>
+        <label for="pickCount">개수</label>
+        <input type="number" id="pickCount" value="1" min="1" max="999">
+        <button class="btn primary" id="addBtn" type="button" disabled>추가</button>
+      </div>
+      <div class="divider"></div>
+      <div class="invlist" id="invList"></div>
+      <div class="flexline" style="margin-top:11px">
+        <button class="btn sm" id="sample1" type="button">예시: 목표 1개</button>
+        <button class="btn sm" id="sample2" type="button">예시: 목표 2개 (10/10)</button>
+        <div class="spacer"></div>
+        <button class="btn sm ghost" id="clearBtn" type="button">전체 삭제</button>
+      </div>
+      <details>
+        <summary>텍스트로 한번에 입력 / 백업</summary>
+        <div class="doc" style="margin-bottom:8px">
+          한 줄에 보석 하나. <b>앞글자만 써도 됩니다.</b> 맨 뒤 숫자는 개수(생략 시 1).<br>
+          예: <code>방강소 3</code> · <code>연이생 4</code> · <code>방해 강타 소환 3</code> · <code>연,이,생</code><br>
+          <span style="color:var(--tx3)">앞글자 — 방(방해) 강(강타) 연(연타) 이(이동) 생(생존) 소(소환) 보(보조) 원(원소).
+          <code>원소</code>는 두 글자로 쓰면 원소, <code>원</code>도 원소입니다.</span>
+        </div>
+        <textarea id="bulkText" spellcheck="false" placeholder="방강소 3&#10;연이생 4"></textarea>
+        <div class="flexline" style="margin-top:8px">
+          <button class="btn sm primary" id="bulkLoad" type="button">불러오기(덮어쓰기)</button>
+          <button class="btn sm" id="bulkDump" type="button">현재 목록 내보내기</button>
+          <span id="bulkMsg" style="font-size:.8rem;color:var(--tx3)"></span>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span>결과</h2>
+    <div id="result"></div>
+  </section>
+
+  <details>
+    <summary>계산 원리 · 왜 개수에 한계가 있나</summary>
+    <div class="doc">
+      <p><b>교환 규칙</b> — 태그 교환은 변경이 아니라 <b>치환</b>입니다. 방해를 소환으로 바꾸면 동시에 모든 소환이 방해로 바뀌고, 가방·보관함·재매입에 있는 <b>보유한 모든 보석</b>에 한꺼번에 적용됩니다. 맞교환 1회당 100만 골드.</p>
+
+      <p><b>목표 1개 — 상한이 존재하는 이유</b><br>
+      맞교환을 몇 번 하든 최종 결과는 "8개 태그 이름을 서로 바꿔치기한 것 하나(순열 σ)"로 합쳐집니다. σ는 일대일 대응이므로 <b>서로 다른 두 조합이 같은 조합으로 합쳐지지 않습니다.</b> 방해·강타·<i>연타</i> 보석과 방해·강타·<i>소환</i> 보석은 딱 한 칸이 다른데, 연타와 소환은 교환 후에도 서로 다른 태그라서 여전히 한 칸이 다릅니다. 즉 둘 중 하나만 목표가 될 수 있습니다.</p>
+      <p>일반적으로 교환 후 목표 T가 되는 보석은 교환 전 조합이 <code>σ⁻¹(T)</code>였던 보석뿐이고, 이는 <b>단 하나의 조합</b>입니다. 따라서</p>
+      <p style="padding-left:12px;border-left:2px solid var(--line2)"><b>완성 최대 개수 = 같은 조합을 가장 많이 보유한 그룹의 크기</b></p>
+      <p>이고, 골드를 더 써도 순서를 바꿔도 이 상한은 넘지 못합니다. 특정 조합 10개를 만들려면 지금 <b>똑같은 조합의 보석이 10개</b> 있어야 합니다. 또 어떤 조합이든 목표와 다른 태그가 최대 3개이므로, 목표가 하나라면 <b>300만 골드 이상 쓸 이유가 없습니다.</b></p>
+
+      <p><b>목표 2개 이상 — 공유 태그 수가 맞아야 한다</b><br>
+      목표 A가 될 보석 그룹 <code>S_A</code>와 목표 B가 될 그룹 <code>S_B</code>는 서로 다른 조합입니다. 그런데 σ가 일대일 대응이므로 <code>σ(S_A ∩ S_B) = σ(S_A) ∩ σ(S_B) = A ∩ B</code>, 즉</p>
+      <p style="padding-left:12px;border-left:2px solid var(--line2)"><b>두 소스 그룹이 공유하는 태그 개수 = 두 목표가 공유하는 태그 개수</b></p>
+      <p>이것이 <b>필요충분조건</b>입니다. 예를 들어 목표 A와 B가 태그 2개를 공유한다면, 10개/10개를 만들려면 "정확히 2개의 태그를 공유하는 10개짜리 그룹 두 개"가 필요합니다. 10개짜리 그룹이 두 개 있어도 공유 태그 수가 1개나 3개면 불가능합니다. 목표가 3개 이상이면 모든 쌍에 대해 이 조건이 동시에 성립해야 합니다. 단 이때 쌍별 조건은 <b>필요조건일 뿐 충분조건이 아닙니다</b> — 삼중 교집합 크기까지 맞아야 하므로, 쌍별 공유 수가 모두 맞는데도 불가능한 경우가 존재합니다. 이 계산기는 순열을 전수 탐색하므로 그런 경우에도 정확한 답을 냅니다.</p>
+      <p>또 목표가 여러 개면 제약을 동시에 만족시켜야 하므로 목표 1개의 300만 상한이 깨지고, 최대 <b>700만 골드(맞교환 7회)</b>까지 필요할 수 있습니다.</p>
+
+      <p><b>계산 방식</b> — 8개 태그의 모든 순열 40,320가지를 전수 탐색해 목표별 완성 개수와 2·1줄 일치 분포를 구하고, 각 결과를 만드는 최소 맞교환 횟수(= 8 − 순환 개수)와 골드를 함께 계산합니다. 완성 개수가 같아도 어떤 태그끼리 교환하느냐에 따라 나머지 보석의 2·1줄이 달라지므로 그 부분도 함께 최적화합니다.</p>
+      <p>참고: <a href="https://mabinogimobile.nexon.com/Info/Guide/3428479" target="_blank" rel="noopener">공식 가이드 – 보석 스킬 태그 바꾸기</a></p>
+    </div>
+  </details>
+
+</main>
+
+<footer>입력값은 어디에도 저장되지 않습니다 — 새로고침하면 초기화됩니다. 기록이 필요하면 위의 <b>텍스트로 한번에 입력 / 백업</b>에서 내보내 두세요.</footer>
+
+<script>
+"use strict";
+
+/* ══════════ 상수 ══════════ */
+const TAGS = ["방해","강타","연타","이동","생존","소환","보조","원소"];
+const ABBR = TAGS.map(t => t[0]);   // 방 강 연 이 생 소 보 원 — 8개 모두 서로 다름
+const N = TAGS.length;              // 8
+const PICK = 3;                     // 보석 1개당 태그 수
+const MAX_GOALS = 4;
+const GOLD_PER_SWAP = 100;          // 만 골드
+const PERM_COUNT = 40320;           // 8!
+const GL = ["A","B","C","D"];
+
+/* ══════════ 순열 사전 계산 ══════════ */
+const PERMS = new Uint8Array(PERM_COUNT * N);   // PERMS[p*N+i] = 태그 i 가 바뀌어 갈 태그
+const SWAPS = new Uint8Array(PERM_COUNT);       // 그 순열을 만드는 최소 맞교환 횟수
+const POPCNT = new Uint8Array(256);
+
+(function precompute(){
+  for (let i = 1; i < 256; i++) POPCNT[i] = POPCNT[i >> 1] + (i & 1);
+
+  const cur = [0,1,2,3,4,5,6,7];
+  let w = 0;
+  (function rec(k){
+    if (k === N) { PERMS.set(cur, w * N); w++; return; }
+    for (let i = k; i < N; i++) {
+      let t = cur[k]; cur[k] = cur[i]; cur[i] = t;
+      rec(k + 1);
+      t = cur[k]; cur[k] = cur[i]; cur[i] = t;
+    }
+  })(0);
+
+  const seen = new Uint8Array(N);
+  for (let p = 0; p < PERM_COUNT; p++) {
+    seen.fill(0);
+    const off = p * N;
+    let cycles = 0;
+    for (let i = 0; i < N; i++) {
+      if (seen[i]) continue;
+      cycles++;
+      let j = i;
+      while (!seen[j]) { seen[j] = 1; j = PERMS[off + j]; }
+    }
+    SWAPS[p] = N - cycles;
+  }
+})();
+
+/* ══════════ 상태 ══════════ */
+const INITIAL_STATE = {
+  goals: [{ name: "", tags: [] }],
+  inv: [],              // [{tags:[a,b,c], count}]
+  maxSwaps: -1,         // -1 = 제한 없음
+  sortMode: "total",    // total | balance
+  w: [1,3,10],          // 1줄 / 2줄 / 3줄 가중치
+};
+// 기록을 남기지 않는다 — 새로고침하면 초기 상태. 백업은 텍스트 내보내기로.
+let state = structuredClone(INITIAL_STATE);
+let pick = [];
+let ranked = [];
+let selKey = null;
+let selAlt = 0;
+
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const maskOf = tags => tags.reduce((m, i) => m | (1 << i), 0);
+const $ = id => document.getElementById(id);
+const goldText = s => s === 0 ? "0" : (s * GOLD_PER_SWAP) + "만";
+const goalName = (g, i) => g.name.trim() || "목표 " + GL[i];
+
+/* ══════════ UI 부품 ══════════ */
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function tagButton(i, on, onClick){
+  const b = el("button", "tag t" + i + (on ? " on" : ""), TAGS[i]);
+  b.type = "button";
+  b.addEventListener("click", onClick);
+  return b;
+}
+function chip(i, dim){
+  return el("span", "chip t" + i + (dim ? " off" : ""), TAGS[i]);
+}
+/** 조합을 칩 묶음으로. hi 마스크를 주면 그 안에 없는 태그는 흐리게 */
+function comboEl(tags, hi){
+  const d = el("span", "combo");
+  tags.forEach(i => d.appendChild(chip(i, hi !== undefined && !(hi & (1 << i)))));
+  return d;
+}
+function goalBadge(i){ return el("span", "glabel g" + i, GL[i]); }
+/** 3개 초과 선택은 가장 오래된 것을 밀어냄 */
+function toggleSel(arr, i){
+  const at = arr.indexOf(i);
+  if (at >= 0) arr.splice(at, 1);
+  else { if (arr.length >= PICK) arr.shift(); arr.push(i); }
+}
+
+/* ══════════ 1. 목표 ══════════ */
+function renderGoals(){
+  const box = $("goalList");
+  box.replaceChildren();
+
+  state.goals.forEach((g, gi) => {
+    const card = el("div", "goal g" + gi);
+
+    const head = el("div", "flexline");
+    head.appendChild(goalBadge(gi));
+    const name = document.createElement("input");
+    name.type = "text"; name.className = "gname"; name.value = g.name;
+    name.placeholder = "목표 " + GL[gi];
+    name.maxLength = 20;
+    name.addEventListener("input", e => { g.name = e.target.value; });
+    name.addEventListener("change", () => run());
+    head.appendChild(name);
+    head.appendChild(el("span", "spacer"));
+    if (state.goals.length > 1) {
+      const del = el("button", "btn sm ghost", "삭제");
+      del.type = "button";
+      del.addEventListener("click", () => {
+        state.goals.splice(gi, 1);
+        selKey = null; renderGoals(); renderInv(); run();
+      });
+      head.appendChild(del);
+    }
+    card.appendChild(head);
+
+    const row = el("div", "tagrow");
+    row.style.marginTop = "8px";
+    for (let i = 0; i < N; i++)
+      row.appendChild(tagButton(i, g.tags.includes(i), () => {
+        toggleSel(g.tags, i);
+        selKey = null; renderGoals(); renderInv(); run();
+      }));
+    card.appendChild(row);
+    box.appendChild(card);
+  });
+
+  $("addGoal").style.display = state.goals.length >= MAX_GOALS ? "none" : "";
+}
+
+/* ══════════ 2. 보유 보석 ══════════ */
+function renderPicker(){
+  const row = $("pickRow");
+  row.replaceChildren();
+  for (let i = 0; i < N; i++)
+    row.appendChild(tagButton(i, pick.includes(i), () => { toggleSel(pick, i); renderPicker(); }));
+
+  const pv = $("pickPreview");
+  pv.replaceChildren();
+  if (!pick.length) {
+    const s = el("span", null, "태그 3개를 고르세요");
+    s.style.cssText = "font-size:.83rem;color:var(--tx3)";
+    pv.appendChild(s);
+  } else {
+    pv.appendChild(comboEl([...pick].sort((a,b) => a-b)));
+  }
+  $("addBtn").disabled = pick.length !== PICK;
+}
+
+function addGems(tags, count){
+  const sorted = [...tags].sort((a,b) => a-b);
+  const key = maskOf(sorted);
+  const hit = state.inv.find(g => maskOf(g.tags) === key);
+  if (hit) hit.count = clamp(hit.count + count, 1, 999);
+  else state.inv.push({ tags: sorted, count: clamp(count, 1, 999) });
+}
+
+/** 각 보석 조합의 현재 최고 일치도와 그 목표 번호 */
+function bestMatch(mask, gMasks){
+  let best = -1, at = -1;
+  gMasks.forEach((gm, i) => {
+    const h = POPCNT[mask & gm];
+    if (h > best) { best = h; at = i; }
+  });
+  return { level: best, at };
+}
+
+function renderInv(){
+  const list = $("invList");
+  list.replaceChildren();
+  const total = state.inv.reduce((s, g) => s + g.count, 0);
+  $("invHint").textContent = state.inv.length
+    ? state.inv.length + "개 조합 · 총 " + total + "개"
+    : "조합 + 개수로 입력";
+
+  if (!state.inv.length) {
+    list.appendChild(el("div", "empty", "보유한 보석을 추가하세요. 같은 조합은 개수로 묶으면 됩니다."));
+    return;
+  }
+
+  const valid = state.goals.filter(g => g.tags.length === PICK);
+  const gMasks = valid.map(g => maskOf(g.tags));
+
+  // 입력한 순서를 그대로 유지한다 — 정렬하면 개수를 올리는 중에 행이 움직여 +/− 를 계속 놓친다.
+  for (const g of state.inv) {
+    const row = el("div", "invrow");
+    const bm = gMasks.length ? bestMatch(maskOf(g.tags), gMasks) : null;
+    row.appendChild(comboEl(g.tags, bm ? gMasks[bm.at] : undefined));
+    if (bm) {
+      const mt = el("span", "mt");
+      const gi = state.goals.indexOf(valid[bm.at]);
+      mt.appendChild(goalBadge(gi));
+      mt.append(" " + bm.level + "/3");
+      row.appendChild(mt);
+    }
+
+    const step = el("div", "step");
+    const mk = (label, delta) => {
+      const b = el("button", null, label);
+      b.type = "button";
+      b.addEventListener("click", () => {
+        g.count += delta;
+        if (g.count < 1) state.inv.splice(state.inv.indexOf(g), 1);
+        selKey = null; renderInv(); run();
+      });
+      return b;
+    };
+    step.append(mk("−", -1), el("span", "cnt", g.count), mk("+", 1));
+    row.appendChild(step);
+
+    const del = el("button", "btn sm ghost", "삭제");
+    del.type = "button";
+    del.addEventListener("click", () => {
+      state.inv.splice(state.inv.indexOf(g), 1);
+      selKey = null; renderInv(); run();
+    });
+    row.appendChild(del);
+    list.appendChild(row);
+  }
+}
+
+/** "방해 강타 소환" / "방강소" / "방,강,소" 를 모두 태그 번호로.
+ *  두 글자 정식 명칭을 먼저 시도한다 — "원소" 가 원(원소) + 소(소환) 로 쪼개지는 것을 막기 위함. */
+function parseTags(text){
+  const found = [];
+  for (let i = 0; i < text.length; ) {
+    let t = TAGS.indexOf(text.slice(i, i + 2));
+    if (t >= 0) i += 2;
+    else { t = ABBR.indexOf(text[i]); i += 1; }
+    if (t >= 0 && !found.includes(t)) found.push(t);
+  }
+  return found.sort((a, b) => a - b);
+}
+
+function parseBulk(text){
+  const out = [], skipped = [];
+  for (const line of text.split(/\r?\n/)) {
+    const s = line.trim();
+    if (!s) continue;
+    const numM = s.match(/(\d+)\s*$/);
+    const count = numM ? clamp(parseInt(numM[1], 10), 1, 999) : 1;
+    const found = parseTags(numM ? s.slice(0, numM.index) : s);
+    if (found.length === PICK) out.push({ tags: found, count });
+    else skipped.push(s);
+  }
+  return { out, skipped };
+}
+
+/* ══════════ 핵심 계산 ══════════ */
+function compute(){
+  const goals = state.goals;
+  const G = goals.length;
+  const gMasks = goals.map(g => maskOf(g.tags));
+
+  const n = state.inv.length;
+  const A = new Uint8Array(n), B = new Uint8Array(n), C = new Uint8Array(n);
+  const CNT = new Int32Array(n);
+  state.inv.forEach((g, k) => {
+    A[k] = g.tags[0]; B[k] = g.tags[1]; C[k] = g.tags[2]; CNT[k] = g.count;
+  });
+
+  const limit = state.maxSwaps < 0 ? N : state.maxSwaps;
+  const found = new Map();
+
+  for (let p = 0; p < PERM_COUNT; p++) {
+    const sw = SWAPS[p];
+    if (sw > limit) continue;
+    const off = p * N;
+    const exact = new Array(G).fill(0);
+    let c2 = 0, c1 = 0, c0 = 0;
+
+    for (let k = 0; k < n; k++) {
+      const m = (1 << PERMS[off + A[k]]) | (1 << PERMS[off + B[k]]) | (1 << PERMS[off + C[k]]);
+      let best = 0, hit = -1;
+      for (let t = 0; t < G; t++) {
+        const h = POPCNT[m & gMasks[t]];
+        if (h === PICK) { hit = t; best = h; break; }
+        if (h > best) best = h;
+      }
+      if (hit >= 0) exact[hit] += CNT[k];
+      else if (best === 2) c2 += CNT[k];
+      else if (best === 1) c1 += CNT[k];
+      else c0 += CNT[k];
+    }
+
+    const key = exact.join("/") + "|" + c2 + "," + c1;
+    const e = found.get(key);
+    if (!e) found.set(key, { key, exact, c2, c1, c0, swaps: sw, perms: [p] });
+    else if (sw < e.swaps) { e.swaps = sw; e.perms = [p]; }
+    else if (sw === e.swaps && e.perms.length < 6) e.perms.push(p);
+  }
+
+  const total = state.inv.reduce((s, g) => s + g.count, 0);
+  const [w1, w2, w3] = state.w;
+  const list = [...found.values()].map(e => {
+    const totalExact = e.exact.reduce((s, v) => s + v, 0);
+    return {
+      ...e,
+      totalExact,
+      minExact: Math.min(...e.exact),
+      lines: totalExact * 3 + e.c2 * 2 + e.c1,
+      score: totalExact * w3 + e.c2 * w2 + e.c1 * w1,
+    };
+  });
+
+  /* 총 완성 개수별 최소 골드 */
+  const byTotal = new Map();
+  for (const r of list) {
+    const cur = byTotal.get(r.totalExact);
+    if (!cur || r.swaps < cur.swaps
+        || (r.swaps === cur.swaps && (r.minExact > cur.minExact
+            || (r.minExact === cur.minExact && r.c2 > cur.c2))))
+      byTotal.set(r.totalExact, r);
+  }
+  const trade = [...byTotal.values()].sort((a, b) => b.totalExact - a.totalExact || a.swaps - b.swaps);
+  let bestSoFar = -1;
+  for (const r of [...trade].sort((a, b) => a.swaps - b.swaps || b.totalExact - a.totalExact)) {
+    r.dominated = r.totalExact <= bestSoFar;
+    if (r.totalExact > bestSoFar) bestSoFar = r.totalExact;
+  }
+
+  list.sort(state.sortMode === "balance"
+    ? (a, b) => b.minExact - a.minExact || b.totalExact - a.totalExact || a.swaps - b.swaps
+    : (a, b) => b.totalExact - a.totalExact || a.swaps - b.swaps
+                || b.minExact - a.minExact || b.c2 - a.c2 || b.c1 - a.c1);
+
+  return { list, trade, total, gMasks, G, goals };
+}
+
+/** 순열 → 실제 진행 순서의 맞교환 목록.
+ *  순환 (a0 a1 … aL-1) 은 swap(a0,a1), swap(a0,a2), …, swap(a0,aL-1) 로 실현된다. */
+function stepsOf(p){
+  const off = p * N, seen = new Array(N).fill(false), steps = [];
+  for (let i = 0; i < N; i++) {
+    if (seen[i]) continue;
+    const cyc = [];
+    let j = i;
+    while (!seen[j]) { seen[j] = true; cyc.push(j); j = PERMS[off + j]; }
+    for (let k = 1; k < cyc.length; k++) steps.push([cyc[0], cyc[k]]);
+  }
+  return steps;
+}
+
+/* ══════════ 3. 결과 ══════════ */
+function run(){
+  const box = $("result");
+  box.replaceChildren();
+
+  const bad = state.goals.findIndex(g => g.tags.length !== PICK);
+  if (bad >= 0) {
+    box.appendChild(el("div", "warnbox",
+      goalName(state.goals[bad], bad) + " 의 태그를 " + PICK + "개 선택하세요. (현재 "
+      + state.goals[bad].tags.length + "개)"));
+    return;
+  }
+  const masks = state.goals.map(g => maskOf(g.tags));
+  if (new Set(masks).size !== masks.length) {
+    box.appendChild(el("div", "warnbox", "같은 태그 조합의 목표가 두 개 있습니다. 서로 다르게 지정하세요."));
+    return;
+  }
+  if (!state.inv.length) {
+    box.appendChild(el("div", "warnbox",
+      "보유 보석을 1개 이상 입력하세요. 아래 '예시' 버튼으로 감을 볼 수 있습니다."));
+    return;
+  }
+
+  const data = compute();
+  ranked = data.list;
+
+  const now = ranked.find(r => r.swaps === 0);
+  const best = data.trade[0];
+  if (!selKey || !ranked.some(r => r.key === selKey)) { selKey = best.key; selAlt = 0; }
+
+  box.appendChild(heroCard(now, best, data));
+  if (data.G > 1) box.appendChild(capacityPanel(data));
+  box.appendChild(tradeTable(data, now));
+  box.appendChild(advancedBox(data));
+  box.appendChild(detailBox(data));
+}
+
+/** 목표별 완성 개수를 "A 10 · B 10" 형태로 */
+function splitEl(exact){
+  const d = el("span", "split");
+  exact.forEach((v, i) => {
+    if (i) d.appendChild(el("i", null, "·"));
+    d.appendChild(goalBadge(i));
+    d.append(" " + v);
+  });
+  return d;
+}
+
+function heroCard(now, best, data){
+  const h = el("div", "hero");
+  h.appendChild(el("div", "lead",
+    state.sortMode === "balance" ? "균형 우선 · 최소 골드 루트" : "총 완성 최대 · 최소 골드 루트"));
+
+  const big = el("p", "big");
+  big.append("완성 ");
+  big.appendChild(el("b", null, now.totalExact + "개 → " + best.totalExact + "개"));
+  big.append(" · ");
+  big.appendChild(el("span", "g", goldText(best.swaps) + " 골드"));
+  if (best.swaps) big.append(" (맞교환 " + best.swaps + "회)");
+  h.appendChild(big);
+
+  const stats = el("div", "stats");
+  const mk = (k, v, cls) => {
+    const d = el("div", "stat");
+    d.append(el("div", "k", k), el("div", "v " + (cls || ""), v));
+    return d;
+  };
+  data.goals.forEach((g, i) => stats.appendChild(mk(goalName(g, i), best.exact[i] + "개", "c3")));
+  stats.append(
+    mk("2줄 일치", best.c2 + "개", "c2"),
+    mk("1줄 일치", best.c1 + "개", "c1"),
+    mk("0줄", best.c0 + "개", "c0"),
+  );
+  h.appendChild(stats);
+  h.appendChild(routeView(best, 0));
+
+  /* 상한 안내 */
+  const groups = groupInfo(data);
+  const note = el("div", "note");
+  note.style.marginTop = "11px";
+  if (data.G === 1) {
+    note.append("완성 상한은 ");
+    note.appendChild(el("b", null, groups[0].count + "개"));
+    note.append(" — 같은 조합을 가장 많이 보유한 그룹 ");
+    note.appendChild(comboEl(groups[0].tags, data.gMasks[0]));
+    note.append(" 의 크기입니다. 교환은 조합에 이름표를 다시 붙이는 것뿐이라, 골드를 더 써도 이 상한은 넘지 못합니다.");
+  } else {
+    const cap = groups.slice(0, data.G).reduce((s, g) => s + g.count, 0);
+    note.append("이론적 상한은 ");
+    note.appendChild(el("b", null, cap + "개"));
+    note.append(" — 상위 " + data.G + "개 그룹의 크기 합(" + groups.slice(0, data.G).map(g => g.count).join(" + ")
+      + ")입니다. 단, 목표끼리 공유하는 태그 개수와 소스 그룹끼리 공유하는 태그 개수가 정확히 같아야 하므로 이 상한에 못 미칠 수 있습니다.");
+  }
+  h.appendChild(note);
+  return h;
+}
+
+function routeView(res, altIdx){
+  const wrap = el("div", "route");
+  const p = res.perms[clamp(altIdx, 0, res.perms.length - 1)];
+  const steps = stepsOf(p);
+
+  if (!steps.length) {
+    wrap.appendChild(el("div", "nostep", "교환 불필요 — 현재 상태가 이미 최적입니다. (0 골드)"));
+    return wrap;
+  }
+  wrap.appendChild(el("div", "rlabel",
+    "교환 순서 · 맞교환 " + steps.length + "회 · 총 " + goldText(steps.length) + " 골드"));
+  const ol = el("ul", "steps");
+  steps.forEach(([a, b], i) => {
+    const li = el("li");
+    li.append(el("span", "n", i + 1), chip(a), el("span", "sw", "↔"), chip(b),
+              el("span", "cost", GOLD_PER_SWAP + "만"));
+    ol.appendChild(li);
+  });
+  wrap.appendChild(ol);
+  return wrap;
+}
+
+/** 같은 조합끼리 묶인 그룹 (크기순) */
+function groupInfo(data){
+  return state.inv
+    .map(g => ({ tags: g.tags, count: g.count, mask: maskOf(g.tags) }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/* ── 달성 가능 최대 ── */
+function capacityPanel(data){
+  const box = el("div");
+  box.appendChild(el("h3", null, "달성 가능 최대"));
+  const p = el("div", "panel");
+
+  const groups = groupInfo(data);
+  const topG = groups.slice(0, data.G);
+  const ceiling = topG.reduce((s, g) => s + g.count, 0);
+  const best = data.trade[0];
+
+  p.appendChild(el("div", "rlabel",
+    "이론적 상한 — 목표마다 서로 다른 조합이 필요하므로, 상위 " + data.G
+    + "개 그룹 크기의 합 " + ceiling + "개"));
+  const ul = el("ul", "steps");
+  topG.forEach(g => {
+    const li = el("li");
+    li.appendChild(comboEl(g.tags));
+    li.appendChild(el("span", "cost", g.count + "개"));
+    ul.appendChild(li);
+  });
+  p.appendChild(ul);
+
+  const hit = best.totalExact >= ceiling;
+  const res = el("div", hit ? "note" : "warnbox");
+  res.style.marginTop = "10px";
+  res.append("실제 동시 최대 — ");
+  res.appendChild(el("b", null, best.totalExact + "개"));
+  res.append(" (");
+  res.appendChild(splitEl(best.exact));
+  res.append(") · " + goldText(best.swaps) + " 골드");
+  res.append(hit ? " — 이론적 상한에 도달했습니다."
+                 : " — 상한보다 " + (ceiling - best.totalExact) + "개 적습니다.");
+  p.appendChild(res);
+
+  if (!hit) p.appendChild(shareRequirement(data, groups));
+  box.appendChild(p);
+  return box;
+}
+
+/** 동시 달성이 상한에 못 미치는 이유 — 공유 태그 수 요건 */
+function shareRequirement(data, groups){
+  const out = el("div");
+  out.style.marginTop = "10px";
+  out.appendChild(el("div", "rlabel",
+    "이유 — σ 가 일대일 대응이므로, 소스 그룹 쌍이 공유하는 태그 개수는 목표 쌍이 공유하는 태그 개수와 정확히 같아야 합니다."));
+
+  const ul = el("ul", "steps");
+  for (let i = 0; i < data.G; i++)
+    for (let j = i + 1; j < data.G; j++) {
+      const li = el("li");
+      li.append(goalBadge(i), el("span", "sw", "↔"), goalBadge(j));
+      li.append(" 공유 " + POPCNT[data.gMasks[i] & data.gMasks[j]] + "개");
+      li.appendChild(el("span", "cost", "소스 그룹도 같아야 함"));
+      ul.appendChild(li);
+    }
+  out.appendChild(ul);
+
+  const cand = groups.slice(0, Math.min(4, groups.length));
+  if (cand.length > 1) {
+    out.appendChild(el("div", "rlabel",
+      "보유 상위 " + cand.length + "개 그룹의 실제 공유 태그 수"));
+    const ul2 = el("ul", "steps");
+    for (let i = 0; i < cand.length; i++)
+      for (let j = i + 1; j < cand.length; j++) {
+        const li = el("li");
+        li.appendChild(comboEl(cand[i].tags));
+        li.appendChild(el("span", "sw", "/"));
+        li.appendChild(comboEl(cand[j].tags));
+        li.appendChild(el("span", "sw", cand[i].count + "개·" + cand[j].count + "개"));
+        li.appendChild(el("span", "cost", "공유 " + POPCNT[cand[i].mask & cand[j].mask] + "개"));
+        ul2.appendChild(li);
+      }
+    out.appendChild(ul2);
+  }
+  if (data.G > 2)
+    out.appendChild(el("div", "rlabel",
+      "목표가 3개 이상이면 위 쌍별 조건은 필요조건일 뿐입니다 — 삼중 교집합 크기까지 맞아야 하므로, 쌍별 공유 수가 모두 맞는데도 불가능할 수 있습니다."));
+  return out;
+}
+
+/* ── 표 ── */
+function makeTable(headHtml, minWidth){
+  const sc = el("div", "scroll");
+  const t = document.createElement("table");
+  if (minWidth) t.style.minWidth = minWidth;
+  t.innerHTML = headHtml;
+  const tb = document.createElement("tbody");
+  t.appendChild(tb);
+  sc.appendChild(t);
+  return { sc, tb };
+}
+function numCell(v, cls){
+  const td = el("td", "num-c " + (cls || ""));
+  td.textContent = v;
+  return td;
+}
+
+function tradeTable(data, now){
+  const box = el("div");
+  const h = el("h3", null, "총 완성 개수 ↔ 골드");
+  h.appendChild(el("span", "hint", "각 완성 개수를 달성하는 최소 비용 · 행을 눌러 상세 보기"));
+  box.appendChild(h);
+
+  const ctl = el("div", "flexline");
+  ctl.style.margin = "0 0 9px";
+  ctl.appendChild(el("label", null, "골드 상한"));
+  const sel = document.createElement("select");
+  [["-1","제한 없음"],["1","100만"],["2","200만"],["3","300만"],
+   ["4","400만"],["5","500만"],["6","600만"],["7","700만"]].forEach(([v, t]) => {
+    const o = document.createElement("option");
+    o.value = v; o.textContent = t;
+    sel.appendChild(o);
+  });
+  sel.value = String(state.maxSwaps);
+  sel.addEventListener("change", e => {
+    state.maxSwaps = parseInt(e.target.value, 10);
+    selKey = null; run();
+  });
+  ctl.appendChild(sel);
+  if (data.G > 1) {
+    ctl.appendChild(el("span", "spacer"));
+    ctl.appendChild(el("label", null, "정렬"));
+    const s2 = document.createElement("select");
+    [["total","총 완성 최대"],["balance","균형 우선"]].forEach(([v, t]) => {
+      const o = document.createElement("option");
+      o.value = v; o.textContent = t;
+      s2.appendChild(o);
+    });
+    s2.value = state.sortMode;
+    s2.addEventListener("change", e => {
+      state.sortMode = e.target.value; selKey = null; run();
+    });
+    ctl.appendChild(s2);
+  }
+  box.appendChild(ctl);
+
+  const multi = data.G > 1;
+  const { sc, tb } = makeTable(
+    '<thead><tr><th>총 완성</th>' + (multi ? '<th class="l">목표별</th>' : '')
+    + '<th>골드</th><th>맞교환</th><th>2줄</th><th>1줄</th><th>0줄</th>'
+    + '<th class="l">비고</th></tr></thead>', multi ? "660px" : "540px");
+
+  for (const r of data.trade) {
+    const tr = el("tr", "clk" + (r.key === selKey ? " sel" : "") + (r.dominated ? " dom" : ""));
+    tr.appendChild(numCell(r.totalExact + "개", "c3"));
+    if (multi) {
+      const td = el("td", "l");
+      td.appendChild(splitEl(r.exact));
+      tr.appendChild(td);
+    }
+    tr.append(numCell(goldText(r.swaps), "gold"), numCell(r.swaps + "회"),
+              numCell(r.c2, "c2"), numCell(r.c1, "c1"), numCell(r.c0, "c0"));
+
+    const td = el("td", "l");
+    if (r.swaps === 0) td.appendChild(el("span", "badge zero", "현재 상태"));
+    else if (r.dominated) td.appendChild(el("span", "badge", "비효율"));
+    else if (r === data.trade[0]) td.appendChild(el("span", "badge rec", "총 완성 최대"));
+    if (r.totalExact < now.totalExact) {
+      const b = el("span", "badge no", "완성 감소");
+      b.style.marginLeft = "5px";
+      td.appendChild(b);
+    }
+    tr.appendChild(td);
+    tr.addEventListener("click", () => { selKey = r.key; selAlt = 0; run(); });
+    tb.appendChild(tr);
+  }
+  box.appendChild(sc);
+  box.appendChild(el("div", "rlabel",
+    "'비효율' 은 더 적은 골드로 같거나 더 많은 완성이 가능한 행입니다."
+    + (data.G === 1 ? " 목표가 하나면 300만 골드 이상 쓸 이유가 없습니다."
+                    : " 목표가 여러 개면 최대 700만(맞교환 7회)까지 필요할 수 있습니다.")));
+  return box;
+}
+
+/** 2·1줄까지 포함한 참고 표 */
+function advancedBox(data){
+  const det = document.createElement("details");
+  det.appendChild(el("summary", null, "2·1줄까지 포함한 가중 점수 루트 (참고)"));
+
+  det.appendChild(el("div", "rlabel",
+    "완성 개수가 같아도 어떤 태그끼리 교환하느냐에 따라 나머지 보석의 2·1줄이 달라집니다."));
+  const line = el("div", "flexline");
+  line.style.margin = "0 0 9px";
+  line.appendChild(el("label", null, "가중치"));
+  [["3줄", 2, "var(--good)"], ["2줄", 1, "var(--warn)"], ["1줄", 0, "var(--tx3)"]]
+    .forEach(([label, idx, color]) => {
+      const c = el("span", "chip", label);
+      c.style.setProperty("--c", color);
+      const inp = document.createElement("input");
+      inp.type = "number"; inp.min = 0; inp.max = 99; inp.value = state.w[idx];
+      inp.style.width = "56px";
+      inp.addEventListener("change", e => {
+        state.w[idx] = clamp(parseInt(e.target.value, 10) || 0, 0, 99);
+        run();
+      });
+      line.append(c, inp);
+    });
+  det.appendChild(line);
+
+  const multi = data.G > 1;
+  const { sc, tb } = makeTable(
+    '<thead><tr><th class="l">교환</th><th>골드</th><th>총 완성</th>'
+    + (multi ? '<th class="l">목표별</th>' : '')
+    + '<th>2줄</th><th>1줄</th><th>유효 줄</th><th>점수</th></tr></thead>',
+    multi ? "720px" : "600px");
+
+  const byScore = [...data.list].sort((a, b) =>
+    b.score - a.score || a.swaps - b.swaps || b.totalExact - a.totalExact);
+  for (const r of byScore.slice(0, 15)) {
+    const tr = el("tr", "clk" + (r.key === selKey ? " sel" : "") + (r.swaps === 0 ? " now" : ""));
+    const tdR = el("td", "l");
+    const steps = stepsOf(r.perms[0]);
+    if (!steps.length) tdR.appendChild(el("span", "badge zero", "현재 상태"));
+    else steps.forEach(([a, b], i) => {
+      if (i) tdR.append(" , ");
+      tdR.append(chip(a), "↔", chip(b));
+    });
+    tr.append(tdR, numCell(goldText(r.swaps), "gold"), numCell(r.totalExact, "c3"));
+    if (multi) {
+      const td = el("td", "l");
+      td.appendChild(splitEl(r.exact));
+      tr.appendChild(td);
+    }
+    tr.append(numCell(r.c2, "c2"), numCell(r.c1, "c1"), numCell(r.lines), numCell(r.score));
+    tr.addEventListener("click", () => { selKey = r.key; selAlt = 0; run(); });
+    tb.appendChild(tr);
+  }
+  det.appendChild(sc);
+  det.appendChild(el("div", "rlabel",
+    "총 " + data.list.length + "가지 결과 중 상위 " + Math.min(15, data.list.length)
+    + "건. '유효 줄' 은 목표와 맞는 옵션 줄의 총합입니다."));
+  return det;
+}
+
+/** 선택 루트 상세 */
+function detailBox(data){
+  const res = ranked.find(r => r.key === selKey) ?? ranked[0];
+  const det = document.createElement("details");
+  det.open = true;
+  det.appendChild(el("summary", null,
+    "선택 루트 상세 — 총 완성 " + res.totalExact + "개 / " + goldText(res.swaps) + " 골드"));
+
+  if (res.perms.length > 1) {
+    const alt = el("div", "flexline");
+    alt.style.marginBottom = "10px";
+    alt.appendChild(el("label", null, "같은 결과를 내는 다른 교환 조합:"));
+    res.perms.forEach((_, i) => {
+      const b = el("button", "btn sm" + (i === selAlt ? " primary" : ""), "#" + (i + 1));
+      b.type = "button";
+      b.addEventListener("click", () => { selAlt = i; run(); });
+      alt.appendChild(b);
+    });
+    det.appendChild(alt);
+  }
+  det.appendChild(routeView(res, selAlt));
+
+  const p = res.perms[clamp(selAlt, 0, res.perms.length - 1)];
+  const off = p * N;
+  const rows = state.inv.map(g => {
+    const to = g.tags.map(i => PERMS[off + i]).sort((a, b) => a - b);
+    return {
+      from: g.tags, to, count: g.count,
+      before: bestMatch(maskOf(g.tags), data.gMasks),
+      after: bestMatch(maskOf(to), data.gMasks),
+    };
+  }).sort((a, b) => b.after.level - a.after.level || b.count - a.count);
+
+  const { sc, tb } = makeTable(
+    '<thead><tr><th class="l">현재 조합</th><th>일치</th><th></th>'
+    + '<th class="l">교환 후</th><th>일치</th><th>개수</th></tr></thead>', "600px");
+  const cls = i => ["c0","c1","c2","c3"][i];
+  for (const r of rows) {
+    const tr = el("tr");
+    const a = el("td", "l");
+    a.appendChild(comboEl(r.from, data.gMasks[r.before.at]));
+    const bcell = el("td", "num-c " + cls(r.before.level));
+    if (data.G > 1) { bcell.appendChild(goalBadge(r.before.at)); bcell.append(" "); }
+    bcell.append(r.before.level + "/3");
+    const mid = el("td", null, "→");
+    mid.style.color = "var(--tx3)";
+    const b = el("td", "l");
+    b.appendChild(comboEl(r.to, data.gMasks[r.after.at]));
+    const acell = el("td", "num-c " + cls(r.after.level));
+    if (data.G > 1) { acell.appendChild(goalBadge(r.after.at)); acell.append(" "); }
+    acell.append(r.after.level + "/3"
+      + (r.after.level > r.before.level ? " ▲" : r.after.level < r.before.level ? " ▼" : ""));
+    tr.append(a, bcell, mid, b, acell, numCell(r.count));
+    tb.appendChild(tr);
+  }
+  const wrap = el("div");
+  wrap.style.marginTop = "12px";
+  wrap.appendChild(sc);
+  det.appendChild(wrap);
+  return det;
+}
+
+/* ══════════ 이벤트 ══════════ */
+$("addGoal").addEventListener("click", () => {
+  if (state.goals.length >= MAX_GOALS) return;
+  state.goals.push({ name: "", tags: [] });
+  selKey = null; renderGoals(); run();
+});
+
+$("addBtn").addEventListener("click", () => {
+  if (pick.length !== PICK) return;
+  addGems(pick, clamp(parseInt($("pickCount").value, 10) || 1, 1, 999));
+  pick = [];
+  selKey = null; renderPicker(); renderInv(); run();
+});
+
+$("sample1").addEventListener("click", () => {
+  state.goals = [{ name: "", tags: [0,1,5] }];
+  state.inv = [
+    { tags:[2,3,4], count:4 }, { tags:[0,1,2], count:3 }, { tags:[1,3,6], count:3 },
+    { tags:[0,5,7], count:2 }, { tags:[2,4,6], count:2 }, { tags:[3,4,7], count:1 },
+    { tags:[0,1,5], count:1 },
+  ];
+  selKey = null; renderGoals(); renderInv(); run();
+});
+
+$("sample2").addEventListener("click", () => {
+  state.goals = [
+    { name: "", tags: [0,1,5] },   // 방해 강타 소환
+    { name: "", tags: [0,1,2] },   // 방해 강타 연타
+  ];
+  state.inv = [
+    { tags:[2,3,4], count:10 },              // 연타 이동 생존
+    { tags:[2,3,6], count:10 },              // 연타 이동 보조
+    { tags:[0,1,5], count:2 },
+    { tags:[4,6,7], count:3 },
+  ];
+  selKey = null; renderGoals(); renderInv(); run();
+});
+
+$("clearBtn").addEventListener("click", () => {
+  if (state.inv.length && !confirm("보유 목록을 전부 지웁니다.")) return;
+  state.inv = []; selKey = null;
+  renderInv(); run();
+});
+
+$("bulkLoad").addEventListener("click", () => {
+  const { out, skipped } = parseBulk($("bulkText").value);
+  if (!out.length) {
+    $("bulkMsg").textContent = "인식된 줄이 없습니다 — 한 줄에 태그 3개가 필요합니다";
+    return;
+  }
+  state.inv = [];
+  out.forEach(g => addGems(g.tags, g.count));
+  selKey = null;
+  $("bulkMsg").textContent = out.length + "줄 반영"
+    + (skipped.length
+        ? " · " + skipped.length + "줄 무시 (" + skipped.slice(0, 2).join(" / ")
+          + (skipped.length > 2 ? " …" : "") + ")"
+        : "");
+  renderInv(); run();
+});
+
+$("bulkDump").addEventListener("click", () => {
+  $("bulkText").value = state.inv
+    .map(g => g.tags.map(i => ABBR[i]).join("") + " " + g.count).join("\n");
+  $("bulkMsg").textContent = state.inv.length + "줄 내보냄";
+});
+
+/* ══════════ 시작 ══════════ */
+renderGoals();
+renderPicker();
+renderInv();
+run();
+</script>
+</body>
+</html>
