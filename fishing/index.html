@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>낚시 매크로 · 마비노기 모바일</title>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#0d1117; --panel:#161b22; --line:#2a323d; --line2:#3a4553;
+  --tx:#e6edf3; --tx2:#9aa7b4; --tx3:#6b7885; --acc:#4dabf7; --acc-dim:#17334f; --warn:#fbbf24;
+}
+body{
+  margin:0; background:var(--bg); color:var(--tx);
+  font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+  font-size:15px; line-height:1.6; letter-spacing:-.01em;
+}
+header{border-bottom:1px solid var(--line); background:linear-gradient(180deg,#131a24,var(--bg))}
+.in{max-width:640px; margin:0 auto; padding:0 16px}
+header .in{padding-top:26px; padding-bottom:22px}
+h1{margin:0; font-size:1.32rem; font-weight:700; letter-spacing:-.02em}
+h1 span{color:var(--acc)}
+.sub{margin:6px 0 0; color:var(--tx2); font-size:.86rem}
+main .in{padding-top:28px; padding-bottom:80px}
+.dl{display:inline-flex; align-items:center; gap:10px; padding:13px 22px; border-radius:10px;
+  background:var(--acc); color:#06121f; font-weight:700; text-decoration:none; font-size:1rem}
+.dl:hover{filter:brightness(1.08)}
+.meta{margin:10px 0 0; color:var(--tx3); font-size:.82rem}
+.panel{margin-top:28px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px}
+.panel h2{margin:0 0 8px; font-size:.98rem}
+ol,ul{margin:0; padding-left:20px; color:var(--tx2)}
+li+li{margin-top:4px}
+b{color:var(--tx)}
+.warn b{color:var(--warn)}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>낚시 <span>매크로</span></h1>
+  <p class="sub">마비노기 모바일 PC 자동 낚시 · Windows 전용</p>
+</div></header>
+<main><div class="in">
+  <a class="dl" href="https://github.com/diorus/mobinogi/releases/latest/download/fishing.exe">⬇ fishing.exe 다운로드</a>
+  <p class="meta">파이썬 설치 없이 바로 실행 · 약 71MB · <a href="https://github.com/diorus/mobinogi/releases" style="color:var(--tx3)">모든 버전</a></p>
+
+  <div class="panel">
+    <h2>사용법</h2>
+    <ol>
+      <li>exe를 <b>쓰기 가능한 폴더</b>(바탕화면 등)에 둔다. 로그·설정이 exe 옆에 생긴다.</li>
+      <li>실행하면 UAC 창이 뜬다 → <b>예</b>. 게임이 관리자 권한이라 매크로도 관리자여야 키가 들어간다.</li>
+      <li>첫 실행은 압축을 푸느라 몇 초 걸린다.</li>
+      <li><b>Ctrl+Shift+F10</b> 으로 어느 창에서든 시작/정지.</li>
+    </ol>
+  </div>
+
+  <div class="panel warn">
+    <h2>실행이 막히면</h2>
+    <ul>
+      <li>SmartScreen 경고: <b>추가 정보 → 실행</b></li>
+      <li>Windows Defender가 지우면: 보호 기록에서 허용하거나 폴더를 예외로 등록</li>
+    </ul>
+  </div>
+</div></main>
+</body>
+</html>
